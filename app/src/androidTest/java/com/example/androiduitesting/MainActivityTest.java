@@ -1,69 +1,62 @@
 package com.example.androiduitesting;
 
-import androidx.appcompat.app.AppCompatActivity;
-import android.os.Bundle;
-import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ListView;
-import java.util.ArrayList;
+import static androidx.test.espresso.Espresso.onData;
+import static androidx.test.espresso.Espresso.onView;
+import static androidx.test.espresso.action.ViewActions.click;
+import static androidx.test.espresso.action.ViewActions.typeText;
+import static androidx.test.espresso.assertion.ViewAssertions.doesNotExist;
+import static androidx.test.espresso.assertion.ViewAssertions.matches;
+import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static androidx.test.espresso.matcher.ViewMatchers.withId;
+import static androidx.test.espresso.matcher.ViewMatchers.withText;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.is;
 
-public class MainActivityTest extends AppCompatActivity {
+import androidx.test.ext.junit.rules.ActivityScenarioRule;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.filters.LargeTest;
 
-    private EditText editTextName;
-    private Button buttonAdd, buttonClear, buttonConfirm;
-    private ListView cityListView;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
-    private ArrayList<String> cityList;
-    private ArrayAdapter<String> cityAdapter;
+@RunWith(AndroidJUnit4.class)
+@LargeTest
+public class MainActivityTest {
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+    @Rule
+    public ActivityScenarioRule<MainActivity> scenario =
+            new ActivityScenarioRule<>(MainActivity.class);
 
-        editTextName = findViewById(R.id.editText_name);
-        buttonAdd = findViewById(R.id.button_add);
-        buttonClear = findViewById(R.id.button_clear);
-        buttonConfirm = findViewById(R.id.button_confirm);
-        cityListView = findViewById(R.id.city_list);
+    @Test
+    public void testAddCity() {
+        onView(withId(R.id.button_add)).perform(click());
+        onView(withId(R.id.editText_name)).perform(typeText("Edmonton"));
+        onView(withId(R.id.button_confirm)).perform(click());
+        onView(withText("Edmonton")).check(matches(isDisplayed()));
+    }
 
-        cityList = new ArrayList<>();
-        cityAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, cityList);
-        cityListView.setAdapter(cityAdapter);
+    @Test
+    public void testClearCity() {
+        onView(withId(R.id.button_add)).perform(click());
+        onView(withId(R.id.editText_name)).perform(typeText("Edmonton"));
+        onView(withId(R.id.button_confirm)).perform(click());
+        onView(withId(R.id.button_add)).perform(click());
+        onView(withId(R.id.editText_name)).perform(typeText("Vancouver"));
+        onView(withId(R.id.button_confirm)).perform(click());
+        onView(withId(R.id.button_clear)).perform(click());
+        onView(withText("Edmonton")).check(doesNotExist());
+        onView(withText("Vancouver")).check(doesNotExist());
+    }
 
-        // when Add button clicked
-        buttonAdd.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                editTextName.setVisibility(View.VISIBLE);
-                buttonConfirm.setVisibility(View.VISIBLE);
-            }
-        });
-
-        // when Confirm button clicked
-        buttonConfirm.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String cityName = editTextName.getText().toString();
-                if (!cityName.isEmpty()) {
-                    cityList.add(cityName);
-                    cityAdapter.notifyDataSetChanged();
-                    editTextName.setText("");
-                }
-                editTextName.setVisibility(View.GONE);
-                buttonConfirm.setVisibility(View.GONE);
-            }
-        });
-
-        // when Clear All button clicked
-        buttonClear.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                cityList.clear();
-                cityAdapter.notifyDataSetChanged();
-            }
-        });
+    @Test
+    public void testListView() {
+        onView(withId(R.id.button_add)).perform(click());
+        onView(withId(R.id.editText_name)).perform(typeText("Edmonton"));
+        onView(withId(R.id.button_confirm)).perform(click());
+        onData(is(instanceOf(String.class)))
+                .inAdapterView(withId(R.id.city_list))
+                .atPosition(0)
+                .check(matches(withText("Edmonton")));
     }
 }
