@@ -25,7 +25,7 @@ public class ShowActivityTest {
     public ActivityScenarioRule<MainActivity> scenario =
             new ActivityScenarioRule<>(MainActivity.class);
 
-    // 1️⃣ Test activity switch
+
     @Test
     public void testActivitySwitch() {
         onView(withId(R.id.button_add)).perform(click());
@@ -36,7 +36,7 @@ public class ShowActivityTest {
         onView(withId(R.id.text_city_name)).check(matches(isDisplayed()));
     }
 
-    // 2️⃣ Test city name is consistent
+
     @Test
     public void testCityNameConsistency() {
         onView(withId(R.id.button_add)).perform(click());
@@ -47,7 +47,7 @@ public class ShowActivityTest {
         onView(withId(R.id.text_city_name)).check(matches(withText("Vancouver")));
     }
 
-    // 3️⃣ Test back button works
+
     @Test
     public void testBackButton() {
         onView(withId(R.id.button_add)).perform(click());
